@@ -1,11 +1,24 @@
 import logging
 
-from src.main import PageAlg, FIFOAlg, LRUAlg, OptAlg
+from src.main import PageAlg, FIFOAlg, LRUAlg, OptAlg, FrameState
 
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(levelname)s: %(message)s"
 )
+
+
+#
+def test_fifo_alg():
+    logging.debug("Running FIFO test")
+
+    alg = FIFOAlg(3, 2)
+    assert alg.find_page(1) == (FrameState.EMPTY, 1)
+    assert alg.find_page(1) == (FrameState.LOADED, 1)
+    assert alg.find_page(2) == (FrameState.EMPTY, 2)
+    assert alg.find_page(2) == (FrameState.LOADED, 2)
+    assert alg.find_page(3) == (FrameState.REPLACE, 1)
+    assert alg.find_page(3) == (FrameState.LOADED, 1)
 
 
 def test_quick(alg: PageAlg):
@@ -16,6 +29,9 @@ def test_quick(alg: PageAlg):
 
 if __name__ == '__main__':
     logging.debug("Running test")
-    algs = [FIFOAlg(), LRUAlg(), OptAlg()]
-    for alg in algs:
-        test_quick(alg)
+
+    test_fifo_alg()
+
+    # algs = [FIFOAlg(), LRUAlg(), OptAlg()]
+    # for alg in algs:
+    #     test_quick(alg)
