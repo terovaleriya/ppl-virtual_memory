@@ -39,7 +39,8 @@ class MemoryManager:
             self.storage.unload_page(cur_page, frame)
             self.storage.load_page(page, frame)
             self.alg.update_mapping(page, frame)
-
+        else:
+            logging.debug("Page %i already loaded to frame %i", page, frame)
         return frame
 
 
@@ -50,6 +51,12 @@ if __name__ == '__main__':
     )
     frame_count = 5
     page_count = 12
+
+    # mm = MemoryManager(LoggingStorage(), FIFOEvictionPolicy(page_count, frame_count))
+    # for _ in itertools.repeat(None, 100):
+    #     mm.find_page(random.randint(1, page_count))
+
     mm = MemoryManager(LoggingStorage(), LRUEvictionPolicy(page_count, frame_count))
     for _ in itertools.repeat(None, 100):
         mm.find_page(random.randint(1, page_count))
+

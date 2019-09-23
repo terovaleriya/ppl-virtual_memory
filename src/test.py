@@ -1,6 +1,6 @@
 import logging
 
-from src.eviction import AbstractEvictionPolicy, FIFOEvictionPolicy, NoPage, PageIndex, FrameIndex
+from src.eviction import AbstractEvictionPolicy, FIFOEvictionPolicy, NoPage, PageIndex, FrameIndex, LRUEvictionPolicy
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -19,8 +19,8 @@ def check(alg: AbstractEvictionPolicy, page: PageIndex, expected_page: PageIndex
         logging.debug("We need page #%i and we get frame #%i to load with currently loaded page #%i", page, frame,
                       cur_page)
 
-    assert cur_page == expected_page
-    assert frame == expected_frame
+    assert cur_page == expected_page, "We expected page " + str(expected_page) + ", but " + str(cur_page) + " received"
+    assert frame == expected_frame, "We expected frame " + str(expected_frame) + ", but " + str(frame) + " received"
     alg.update_mapping(page, frame)
 
 
@@ -41,17 +41,32 @@ def test_fifo_eviction():
     logging.debug("FIFO test completed")
 
 
-def test_quick(alg: AbstractEvictionPolicy):
-    page = alg.find_page(0)
-    logging.debug(page)
-    assert page == 1
+def test_lru_eviction():
+    logging.debug("Running LRU test")
+
+    alg = LRUEvictionPolicy(13, 4)
+    check(alg, 1, NoPage, 1)
+    check(alg, 1, 1, 1)
+    check(alg, 2, NoPage, 2)
+    check(alg, 2, 2, 2)
+    check(alg, 3, NoPage, 3)
+    check(alg, 3, 3, 3)
+    check(alg, 4, NoPage, 4)
+    check(alg, 1, 1, 1)
+    check(alg, 2, 2, 2)
+    check(alg, 3, 3, 3)
+    check(alg, 1, 1, 1)
+    check(alg, 3, 3, 3)
+    check(alg, 6, 4, 4)
+    check(alg, 7, 2, 2) #
+    check(alg, 4, 1, 1)
+
+    logging.debug("LRU test completed")
 
 
 if __name__ == '__main__':
     logging.debug("Running tests")
 
-    test_fifo_eviction()
+    # test_fifo_eviction()
 
-    # algs = [FIFOAlg(), LRUAlg(), OptAlg()]
-    # for alg in algs:
-    #     test_quick(alg)
+    test_lru_eviction()

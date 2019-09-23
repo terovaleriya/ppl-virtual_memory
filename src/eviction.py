@@ -1,3 +1,4 @@
+import logging
 import time
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict
@@ -39,17 +40,18 @@ class AbstractEvictionPolicy(ABC):
         pass
 
     def update_mapping(self, page: PageIndex, frame: FrameIndex) -> None:
-        of = self.p2f.get(page, NoFrame)
         op = self.f2p.get(frame, NoPage)
+        if op != page:
+            of = self.p2f.get(page, NoFrame)
 
-        if of != NoFrame:
-            self.f2p.pop(of)
+            if of != NoFrame:
+                self.f2p.pop(of)
 
-        if op != NoPage:
-            self.p2f.pop(op)
+            if op != NoPage:
+                self.p2f.pop(op)
 
-        self.p2f[page] = frame
-        self.f2p[frame] = page
+            self.p2f[page] = frame
+            self.f2p[frame] = page
 
 
 class FIFOEvictionPolicy(AbstractEvictionPolicy):
@@ -82,7 +84,7 @@ class LRUEvictionPolicy(AbstractEvictionPolicy):
 
     def update_mapping(self, page: PageIndex, frame: FrameIndex) -> None:
         op = self.f2p.get(frame, NoPage)
-        if op != NoPage:
+        if op != NoPage and op != page:
             self.last_used_time.pop(op, NoPage)
         super().update_mapping(page, frame)
 
