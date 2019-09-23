@@ -67,6 +67,6 @@ def test_lru_eviction():
 if __name__ == '__main__':
     logging.debug("Running tests")
 
-    # test_fifo_eviction()
+    test_fifo_eviction()
 
     test_lru_eviction()

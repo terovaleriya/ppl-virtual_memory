@@ -17,11 +17,14 @@ class Storage(ABC):
 
 
 class LoggingStorage(Storage):
+    def __init__(self, name: str):
+        self.name = name
+
     def load_page(self, page: PageIndex, frame: FrameIndex):
-        logging.debug("Loading page %i into frame %i", page, frame)
+        logging.debug("Loading page %i into frame %i in storage %s", page, frame, self.name)
 
     def unload_page(self, page: PageIndex, frame: FrameIndex):
-        logging.debug("Unloading page %i from frame %i", page, frame)
+        logging.debug("Unloading page %i from frame %i in storage %s", page, frame, self.name)
 
 
 class MemoryManager:
@@ -52,11 +55,13 @@ if __name__ == '__main__':
     frame_count = 5
     page_count = 12
 
-    # mm = MemoryManager(LoggingStorage(), FIFOEvictionPolicy(page_count, frame_count))
-    # for _ in itertools.repeat(None, 100):
-    #     mm.find_page(random.randint(1, page_count))
-
-    mm = MemoryManager(LoggingStorage(), LRUEvictionPolicy(page_count, frame_count))
+    logging.debug("We run FIFO memory manager")
+    m0 = MemoryManager(LoggingStorage("M0"), FIFOEvictionPolicy(page_count, frame_count))
     for _ in itertools.repeat(None, 100):
-        mm.find_page(random.randint(1, page_count))
+        m0.find_page(random.randint(1, page_count))
 
+    logging.debug("\n\n########################\n\n")
+    logging.debug("We run LRU memory manager")
+    m1 = MemoryManager(LoggingStorage("M1"), LRUEvictionPolicy(page_count, frame_count))
+    for _ in itertools.repeat(None, 100):
+        m1.find_page(random.randint(1, page_count))

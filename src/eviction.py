@@ -17,14 +17,17 @@ class AbstractEvictionPolicy(ABC):
     page_count: PageIndex
     frame_count: FrameIndex
 
-    p2f: Dict[PageIndex, FrameIndex] = {}
-    f2p: Dict[FrameIndex, PageIndex] = {}
+    p2f: Dict[PageIndex, FrameIndex]
+    f2p: Dict[FrameIndex, PageIndex]
 
     def __init__(self, page_count: PageIndex, frame_count: FrameIndex):
         self.frame_count = frame_count
         self.page_count = page_count
+        self.p2f = {}
+        self.f2p = {}
 
     def find_page(self, page: PageIndex) -> AlgResult:
+        logging.debug(self.p2f)
         frame = self.p2f.get(page, NoFrame)
         if frame == NoFrame:
             if len(self.f2p) < self.frame_count:
