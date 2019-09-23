@@ -1,4 +1,3 @@
-import logging
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict
 
@@ -30,8 +29,8 @@ class AbstractEvictionPolicy(ABC):
                 page = NoPage
                 frame = len(self.f2p) + 1
             else:
-                nf = self.next_frame_to_evict()
-                frame, page = nf, self.f2p[nf]
+                frame = self.next_frame_to_evict()
+                page = self.f2p[frame]
         return page, frame
 
     @abstractmethod
