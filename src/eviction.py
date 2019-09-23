@@ -23,8 +23,19 @@ class AbstractEvictionPolicy(ABC):
         self.frame_count = frame_count
         self.page_count = page_count
 
-    @abstractmethod
     def find_page(self, page: PageIndex) -> AlgResult:
+        frame = self.p2f.get(page, NoFrame)
+        if frame == NoFrame:
+            if len(self.f2p) < self.frame_count:
+                page = NoPage
+                frame = len(self.f2p) + 1
+            else:
+                nf = self.next_frame_to_evict()
+                frame, page = nf, self.f2p[nf]
+        return page, frame
+
+    @abstractmethod
+    def next_frame_to_evict(self) -> int:
         pass
 
     def update_mapping(self, page: PageIndex, frame: FrameIndex):
@@ -47,18 +58,12 @@ class FIFOEvictionPolicy(AbstractEvictionPolicy):
     def __init__(self, page_count: PageIndex, frame_count: FrameIndex):
         super().__init__(page_count, frame_count)
 
-    def find_page(self, page: PageIndex) -> AlgResult:
-        frame = self.p2f.get(page, NoFrame)
-        if frame == NoFrame:
-            if len(self.f2p) < self.frame_count:
-                page = NoPage
-                frame = len(self.f2p) + 1
-            else:
-                frame, page = self.insertion_index, self.f2p[self.insertion_index]
-                self.insertion_index = self.insertion_index + 1
-                if self.insertion_index == self.frame_count + 1:
-                    self.insertion_index = 1
-        return page, frame
+    def next_frame_to_evict(self) -> int:
+        frame = self.insertion_index
+        self.insertion_index = self.insertion_index + 1
+        if self.insertion_index == self.frame_count + 1:
+            self.insertion_index = 1
+        return frame
 
 
 class LRUEvictionPolicy(AbstractEvictionPolicy):
@@ -67,14 +72,14 @@ class LRUEvictionPolicy(AbstractEvictionPolicy):
     def __init__(self, page_count: PageIndex, frame_count: int):
         super().__init__(page_count, frame_count)
 
-    def find_page(self, page: PageIndex) -> AlgResult:
-        self.counter = self.counter + 1
-        return NoPage, self.counter
+    def next_frame_to_evict(self) -> int:
+        pass
 
 
 class OptEvictionPolicy(AbstractEvictionPolicy):
     def __init__(self, page_count: PageIndex, frame_count: FrameIndex):
         super().__init__(page_count, frame_count)
 
-    def find_page(self, page) -> AlgResult:
-        pass
+    def next_frame_to_evict(self) -> int:
+        return 1
+
