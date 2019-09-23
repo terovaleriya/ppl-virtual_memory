@@ -1,3 +1,4 @@
+import time
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict
 
@@ -37,7 +38,7 @@ class AbstractEvictionPolicy(ABC):
     def next_frame_to_evict(self) -> int:
         pass
 
-    def update_mapping(self, page: PageIndex, frame: FrameIndex):
+    def update_mapping(self, page: PageIndex, frame: FrameIndex) -> None:
         of = self.p2f.get(page, NoFrame)
         op = self.f2p.get(frame, NoPage)
 
@@ -66,13 +67,24 @@ class FIFOEvictionPolicy(AbstractEvictionPolicy):
 
 
 class LRUEvictionPolicy(AbstractEvictionPolicy):
-    counter: int = 0
+    last_used_time: Dict[PageIndex, float] = {}
 
     def __init__(self, page_count: PageIndex, frame_count: int):
         super().__init__(page_count, frame_count)
 
     def next_frame_to_evict(self) -> int:
-        pass
+        lru_page = min(self.last_used_time, key=self.last_used_time.get)
+        return self.p2f[lru_page]
+
+    def find_page(self, page: PageIndex) -> AlgResult:
+        self.last_used_time[page] = time.clock()
+        return super().find_page(page)
+
+    def update_mapping(self, page: PageIndex, frame: FrameIndex) -> None:
+        op = self.f2p.get(frame, NoPage)
+        if op != NoPage:
+            self.last_used_time.pop(op, NoPage)
+        super().update_mapping(page, frame)
 
 
 class OptEvictionPolicy(AbstractEvictionPolicy):
@@ -81,4 +93,3 @@ class OptEvictionPolicy(AbstractEvictionPolicy):
 
     def next_frame_to_evict(self) -> int:
         return 1
-

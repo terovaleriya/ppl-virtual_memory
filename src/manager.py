@@ -3,7 +3,7 @@ import logging
 import random
 from abc import ABC, abstractmethod
 
-from src.eviction import PageIndex, AbstractEvictionPolicy, FrameIndex, NoPage, FIFOEvictionPolicy
+from src.eviction import PageIndex, AbstractEvictionPolicy, FrameIndex, NoPage, FIFOEvictionPolicy, LRUEvictionPolicy
 
 
 class Storage(ABC):
@@ -50,6 +50,6 @@ if __name__ == '__main__':
     )
     frame_count = 5
     page_count = 12
-    mm = MemoryManager(LoggingStorage(), FIFOEvictionPolicy(page_count, frame_count))
+    mm = MemoryManager(LoggingStorage(), LRUEvictionPolicy(page_count, frame_count))
     for _ in itertools.repeat(None, 100):
         mm.find_page(random.randint(1, page_count))
