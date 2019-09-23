@@ -8,7 +8,7 @@ PageIndex = int
 NoPage: PageIndex = 0
 NoFrame: FrameIndex = 0
 
-# запрошенная страница, текущяя загруженная в кадр страница и номер кадра с которым работать
+# текущяя траница загруженная в кадр и номер кадра
 AlgResult = Tuple[PageIndex, FrameIndex]
 
 
